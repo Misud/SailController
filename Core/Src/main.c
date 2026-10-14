@@ -66,9 +66,9 @@ void SystemClock_Config(void);
   */
 int main(void)
 {
-	//初始化111
 
   /* USER CODE BEGIN 1 */
+	// 初始化 
 
   /* USER CODE END 1 */
 
