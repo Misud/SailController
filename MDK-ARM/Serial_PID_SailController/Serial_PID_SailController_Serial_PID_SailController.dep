@@ -1,7 +1,7 @@
 Dependencies for Project 'Serial_PID_SailController', Target 'Serial_PID_SailController': (DO NOT MODIFY !)
 CompilerVersion: <unknown>
 F (startup_stm32f103xb.s)(0x6ACF07E8)()
-F (../Core/Src/main.c)(0x6ACF0C82)()
+F (../Core/Src/main.c)(0x6ACF0DE7)()
 F (../Core/Src/gpio.c)(0x6ACF07E6)()
 F (../Core/Src/spi.c)(0x6ACED430)()
 F (../Core/Src/tim.c)(0x6ACF07E6)()
