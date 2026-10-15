@@ -396,6 +396,56 @@
           <GroupName>Application/User/Core</GroupName>
           <Files>
             <File>
+              <FileName>FiniteState_Machine.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\FiniteState_Machine.c</FilePath>
+            </File>
+            <File>
+              <FileName>FiniteState_Machine.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Inc\FiniteState_Machine.h</FilePath>
+            </File>
+            <File>
+              <FileName>Serial_PID.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\Serial_PID.c</FilePath>
+            </File>
+            <File>
+              <FileName>Serial_PID.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Inc\Serial_PID.h</FilePath>
+            </File>
+            <File>
+              <FileName>PathPlanning.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\PathPlanning.c</FilePath>
+            </File>
+            <File>
+              <FileName>PathPlanning.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Inc\PathPlanning.h</FilePath>
+            </File>
+            <File>
+              <FileName>Light_Sound.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\Light_Sound.c</FilePath>
+            </File>
+            <File>
+              <FileName>Light_Sound.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Inc\Light_Sound.h</FilePath>
+            </File>
+            <File>
+              <FileName>I2C.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\I2C.c</FilePath>
+            </File>
+            <File>
+              <FileName>I2C.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Inc\I2C.h</FilePath>
+            </File>
+            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/main.c</FilePath>
@@ -429,66 +479,6 @@
               <FileName>stm32f1xx_hal_msp.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/stm32f1xx_hal_msp.c</FilePath>
-            </File>
-            <File>
-              <FileName>FiniteState_Machine.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\FiniteState_Machine.c</FilePath>
-            </File>
-            <File>
-              <FileName>FiniteState_Machine.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Core\Inc\FiniteState_Machine.h</FilePath>
-            </File>
-            <File>
-              <FileName>Serial_PID.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\Serial_PID.c</FilePath>
-            </File>
-            <File>
-              <FileName>Serial_PID.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Core\Inc\Serial_PID.h</FilePath>
-            </File>
-            <File>
-              <FileName>pwm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\pwm.c</FilePath>
-            </File>
-            <File>
-              <FileName>pwm.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Core\Inc\pwm.h</FilePath>
-            </File>
-            <File>
-              <FileName>PathPlanning.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\PathPlanning.c</FilePath>
-            </File>
-            <File>
-              <FileName>PathPlanning.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Core\Inc\PathPlanning.h</FilePath>
-            </File>
-            <File>
-              <FileName>Light_Sound.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\Light_Sound.c</FilePath>
-            </File>
-            <File>
-              <FileName>Light_Sound.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Core\Inc\Light_Sound.h</FilePath>
-            </File>
-            <File>
-              <FileName>I2C.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\I2C.c</FilePath>
-            </File>
-            <File>
-              <FileName>I2C.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Core\Inc\I2C.h</FilePath>
             </File>
           </Files>
         </Group>

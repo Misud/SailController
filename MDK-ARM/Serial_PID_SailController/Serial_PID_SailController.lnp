@@ -1,5 +1,10 @@
 --cpu Cortex-M3
 "serial_pid_sailcontroller\startup_stm32f103xb.o"
+"serial_pid_sailcontroller\finitestate_machine.o"
+"serial_pid_sailcontroller\serial_pid.o"
+"serial_pid_sailcontroller\pathplanning.o"
+"serial_pid_sailcontroller\light_sound.o"
+"serial_pid_sailcontroller\i2c.o"
 "serial_pid_sailcontroller\main.o"
 "serial_pid_sailcontroller\gpio.o"
 "serial_pid_sailcontroller\spi.o"

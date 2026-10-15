@@ -1,3 +1,7 @@
-// FiniteState_Machine  ×´Ì¬»ú¹ÜÀí
-// ¶¥²ãÉÏÎ»»ú
-// 1. IDLE ³õÊ¼»¯ 2. CMD1 Ö¸Áî1 3. CMD2
+/*
+    Finite_State_Machine
+    ×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½*1 ï¿½ï¿½×´Ì¬ï¿½ï¿½*5
+*/
+
+#include "FiniteState_Machine.h"

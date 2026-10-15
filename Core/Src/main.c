@@ -25,7 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "Light_Sound.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -68,7 +68,6 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	// 初始化 
 
   /* USER CODE END 1 */
 
@@ -96,7 +95,9 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  LED_OFF();                      // 熄灭LED
+  HAL_TIM_Base_Start_IT(&htim1);  // 启动TIM1 中断
+  LED_DoubleFlash_Start();        // 进行1次双闪
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -106,6 +107,11 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    if(LED_DoubleFlash_Done())
+    {
+      HAL_Delay(1000);
+      LED_DoubleFlash_Start();
+    }
   }
   /* USER CODE END 3 */
 }
@@ -150,7 +156,17 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  if(htim->Instance == TIM1)
+  {
+    LED_DoubleFlash_Update();
+  }
+  else if(htim->Instance == TIM2)
+  {
 
+  }
+}
 /* USER CODE END 4 */
 
 /**
