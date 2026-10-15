@@ -97,7 +97,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   LED_OFF();                      // 熄灭LED
   HAL_TIM_Base_Start_IT(&htim1);  // 启动TIM1 中断
-  LED_DoubleFlash_Start();        // 进行1次双闪
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -107,10 +107,10 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    if(LED_DoubleFlash_Done())
+    if(Light_Sound_Done())
     {
-      HAL_Delay(1000);
-      LED_DoubleFlash_Start();
+      HAL_Delay(2000);
+      Light_Sound_Start(500);
     }
   }
   /* USER CODE END 3 */
@@ -160,7 +160,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if(htim->Instance == TIM1)
   {
-    LED_DoubleFlash_Update();
+    Buzzer_Update();
+    LED_DoubleFlash_Update(800);
+    Light_Sound_Update();
   }
   else if(htim->Instance == TIM2)
   {
