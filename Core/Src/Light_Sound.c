@@ -126,14 +126,22 @@ uint8_t Buzzer_Done(void)
 
 /*==========声光提示==========*/
 static uint8_t light_sound_en = 0;                              // 使能声光提示
+static uint16_t light_sound_duration= 0;                        // 用于记录声光时长
 
 // 进行一次声光提示
 void Light_Sound_Start(uint16_t duration_ms)
 {
     light_sound_en = 1;
+    light_sound_duration = duration_ms;
 
     LED_DoubleFlash_Start();    // 启动LED双闪
-    Buzzer_Start(800);             // 启动蜂鸣器
+    Buzzer_Start(duration_ms);             // 启动蜂鸣器
+}
+
+// 获取声光时长
+uint16_t Light_Sound_GetDuration(void)
+{
+    return light_sound_duration;
 }
 
 // 在 TIM1 1kHz 中断中调用

@@ -21,11 +21,16 @@
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
+#include "usb_device.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "usbd_cdc_if.h"
 #include "Light_Sound.h"
+#include "I2C.h"
+#include "OLED.h"
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -46,7 +51,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+SoftI2C_t i2c_oled = {GPIOB, GPIO_PIN_6,  GPIOB, GPIO_PIN_7 };
+SoftI2C_t i2c_mpu  = {GPIOB, GPIO_PIN_10, GPIOB, GPIO_PIN_11};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -57,7 +63,11 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+int fputc(int ch, FILE *f)
+{
+  HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 10);
+  return ch;
+}
 /* USER CODE END 0 */
 
 /**
@@ -94,24 +104,41 @@ int main(void)
   MX_TIM2_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
+  MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
-  LED_OFF();                      // Ï¨ÃðLED
-  HAL_TIM_Base_Start_IT(&htim1);  // Æô¶¯TIM1 ÖÐ¶Ï
+  LED_OFF();                      // Ï¨ï¿½ï¿½LED
+  HAL_TIM_Base_Start_IT(&htim1);  // ï¿½ï¿½ï¿½ï¿½TIM1 ï¿½Ð¶ï¿½
 
+  SoftI2C_Init(&i2c_oled);
+  SoftI2C_Init(&i2c_mpu);
+
+  OLED_Init(&i2c_oled);           // ï¿½ï¿½Ê¼ï¿½ï¿½OLED
+  OLED_TestAllOn();
+  HAL_Delay(1000);
+  OLED_Clear();
+
+  SoftI2C_Scan(&i2c_oled);
+  SoftI2C_Scan(&i2c_mpu);
+
+  OLED_ShowString(0, 0, "OLED OK!");
+  OLED_ShowString(0, 2, "I2C OK!");
+  OLED_ShowString(0, 4, "2026-10-16");
+  OLED_Refresh();                 // Ë¢ï¿½Âµï¿½ï¿½ï¿½Ä»
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    uint8_t msg[] = "HELLO from STM32!\r\n";
+    CDC_Transmit_FS(msg, sizeof(msg) - 1);    // ·¢ËÍ×Ö·û´®
+    HAL_Delay(1000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    if(Light_Sound_Done())
-    {
-      HAL_Delay(2000);
-      Light_Sound_Start(500);
-    }
+    OLED_ShowFloat(0, 6, 3.1415926, 3); // ï¿½ï¿½Ê¾Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    OLED_Refresh();
+    HAL_Delay(500);
   }
   /* USER CODE END 3 */
 }
@@ -124,6 +151,7 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
@@ -153,6 +181,12 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USB;
+  PeriphClkInit.UsbClockSelection = RCC_USBCLKSOURCE_PLL_DIV1_5;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+  {
+    Error_Handler();
+  }
 }
 
 /* USER CODE BEGIN 4 */
@@ -161,7 +195,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if(htim->Instance == TIM1)
   {
     Buzzer_Update();
-    LED_DoubleFlash_Update(800);
+    LED_DoubleFlash_Update(Light_Sound_GetDuration());
     Light_Sound_Update();
   }
   else if(htim->Instance == TIM2)

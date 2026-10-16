@@ -24,6 +24,7 @@ uint8_t Buzzer_Done(void);
 //声光提示
 void Light_Sound_Start(uint16_t duration_ms);
 void Light_Sound_Update(void);
+uint16_t Light_Sound_GetDuration(void);
 uint8_t Light_Sound_Done(void);
 
 #endif

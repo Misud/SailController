@@ -8,13 +8,19 @@
                 "d:\\STM32CubeMX_Project\\Serial_PID_SailController\\Drivers\\STM32F1xx_HAL_Driver\\Inc\\Legacy",
                 "d:\\STM32CubeMX_Project\\Serial_PID_SailController\\Drivers\\CMSIS\\Device\\ST\\STM32F1xx\\Include",
                 "d:\\STM32CubeMX_Project\\Serial_PID_SailController\\Drivers\\CMSIS\\Include",
+                "d:\\STM32CubeMX_Project\\Serial_PID_SailController\\USB_DEVICE\\App",
+                "d:\\STM32CubeMX_Project\\Serial_PID_SailController\\USB_DEVICE\\Target",
+                "d:\\STM32CubeMX_Project\\Serial_PID_SailController\\Middlewares\\ST\\STM32_USB_Device_Library\\Core\\Inc",
+                "d:\\STM32CubeMX_Project\\Serial_PID_SailController\\Middlewares\\ST\\STM32_USB_Device_Library\\Class\\CDC\\Inc",
                 "D:\\KEIL5_Dev\\ARM\\ARMCLANG\\include",
                 "D:\\KEIL5_Dev\\ARM\\ARMCLANG\\include\\arm_linux",
                 "D:\\KEIL5_Dev\\ARM\\ARMCLANG\\include\\arm_linux_compat",
                 "D:\\KEIL5_Dev\\ARM\\ARMCLANG\\include\\libcxx",
                 "d:\\STM32CubeMX_Project\\Serial_PID_SailController\\MDK-ARM",
                 "d:\\STM32CubeMX_Project\\Serial_PID_SailController\\Core\\Src",
-                "d:\\STM32CubeMX_Project\\Serial_PID_SailController\\Drivers\\STM32F1xx_HAL_Driver\\Src"
+                "d:\\STM32CubeMX_Project\\Serial_PID_SailController\\Drivers\\STM32F1xx_HAL_Driver\\Src",
+                "d:\\STM32CubeMX_Project\\Serial_PID_SailController\\Middlewares\\ST\\STM32_USB_Device_Library\\Core\\Src",
+                "d:\\STM32CubeMX_Project\\Serial_PID_SailController\\Middlewares\\ST\\STM32_USB_Device_Library\\Class\\CDC\\Src"
             ],
             "defines": [
                 "USE_HAL_DRIVER",
