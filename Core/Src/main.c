@@ -30,6 +30,7 @@
 #include "Light_Sound.h"
 #include "I2C.h"
 #include "OLED.h"
+#include "MPU6050.h"
 #include <stdio.h>
 /* USER CODE END Includes */
 
@@ -53,6 +54,7 @@
 /* USER CODE BEGIN PV */
 SoftI2C_t i2c_oled = {GPIOB, GPIO_PIN_6,  GPIOB, GPIO_PIN_7 };
 SoftI2C_t i2c_mpu  = {GPIOB, GPIO_PIN_10, GPIOB, GPIO_PIN_11};
+MPU6050_Data_t mpu_data;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -119,26 +121,45 @@ int main(void)
 
   SoftI2C_Scan(&i2c_oled);
   SoftI2C_Scan(&i2c_mpu);
+  uint8_t who_am_i = SoftI2C_ReadReg(&i2c_mpu, 0x68, 0x75);
 
   OLED_ShowString(0, 0, "OLED OK!");
   OLED_ShowString(0, 2, "I2C OK!");
   OLED_ShowString(0, 4, "2026-10-16");
+  OLED_ShowInt(0, 6, (int32_t)who_am_i);
+  OLED_ShowString(25, 6, "MPU6050 OK!");
   OLED_Refresh();                 // Ë¢ï¿½Âµï¿½ï¿½ï¿½Ä»
+  HAL_Delay(1000);
+  OLED_Clear();
+  OLED_Refresh();
+
+  MPU6050_Init(&i2c_mpu);
+  MPU6050_Calibrate(200);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    uint8_t msg[] = "HELLO from STM32!\r\n";
-    CDC_Transmit_FS(msg, sizeof(msg) - 1);    // ·¢ËÍ×Ö·û´®
-    HAL_Delay(1000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    OLED_ShowFloat(0, 6, 3.1415926, 3); // ï¿½ï¿½Ê¾Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    MPU6050_ReadData(&mpu_data);
+
+    OLED_Clear();
+
+    OLED_ShowString(0,  0, "Accel(g):");
+    OLED_ShowFloat(0,  1, mpu_data.accel_x, 2);
+    OLED_ShowFloat(45, 1, mpu_data.accel_y, 2);
+    OLED_ShowFloat(90, 1, mpu_data.accel_z, 2);
+
+    OLED_ShowString(0,  2, "Gyro(deg/s):");
+    OLED_ShowFloat(0,  3, mpu_data.gyro_x, 1);
+    OLED_ShowFloat(45, 3, mpu_data.gyro_y, 1);
+    OLED_ShowFloat(90, 3, mpu_data.gyro_z, 1);
+
     OLED_Refresh();
-    HAL_Delay(500);
+    HAL_Delay(50);
   }
   /* USER CODE END 3 */
 }

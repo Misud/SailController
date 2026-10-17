@@ -32,5 +32,8 @@ void OLED_ShowFloat(uint8_t x, uint8_t y, float num, uint8_t decimals);
 // 刷新（把缓冲区写到屏幕）
 void OLED_Refresh(void);
 
+// 更高速的刷新
+static void OLED_WriteDataBulk(uint8_t *buf, uint16_t len);
+
 
 #endif

@@ -198,10 +198,7 @@ void OLED_Refresh(void)
     for(uint8_t page = 0; page < 8; page++)
     {
         OLED_SetPos(0, page);
-        for(uint8_t col = 0; col < 128; col++)
-        {
-            OLED_WriteData(oled_buf[page * 128 + col]);
-        }
+        OLED_WriteDataBulk(&oled_buf[page * 128], 128);     //连续写入这一页的128字节
     }
 }
 
@@ -265,4 +262,18 @@ void OLED_ShowFloat(uint8_t x, uint8_t y, float num, uint8_t decimals)
     sprintf(fmt, "%%.%df", decimals);
     sprintf(buf, fmt, num);
     OLED_ShowString(x, y, buf);
+}
+
+
+/*==========连续写数据==========*/
+static void OLED_WriteDataBulk(uint8_t *buf, uint16_t len)
+{
+    SoftI2C_Start(oled_i2c);
+    SoftI2C_SendByte(oled_i2c, (OLED_ADDR << 1) | 0);
+    SoftI2C_SendByte(oled_i2c, 0x40);
+    for(uint16_t i = 0; i < len; i++)
+    {
+        SoftI2C_SendByte(oled_i2c, buf[i]);
+    }
+    SoftI2C_Stop(oled_i2c);
 }
