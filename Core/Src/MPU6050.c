@@ -1,7 +1,6 @@
 /*
-  Kalman_Filter
-  构建卡尔曼滤波器
-  卡尔曼滤波主要用于MPU6050角度滤波
+  MPU6050
+  用于管理MPU6050的相关代码
 */
 
 #include "MPU6050.h"

@@ -18,6 +18,7 @@
 "serial_pid_sailcontroller\usart.o"
 "serial_pid_sailcontroller\stm32f1xx_it.o"
 "serial_pid_sailcontroller\stm32f1xx_hal_msp.o"
+"serial_pid_sailcontroller\kalman.o"
 "serial_pid_sailcontroller\stm32f1xx_hal_gpio_ex.o"
 "serial_pid_sailcontroller\stm32f1xx_hal_pcd.o"
 "serial_pid_sailcontroller\stm32f1xx_hal_pcd_ex.o"

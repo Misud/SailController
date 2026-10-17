@@ -540,6 +540,16 @@
               <FileType>1</FileType>
               <FilePath>../Core/Src/stm32f1xx_hal_msp.c</FilePath>
             </File>
+            <File>
+              <FileName>Kalman.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Inc\Kalman.h</FilePath>
+            </File>
+            <File>
+              <FileName>Kalman.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\Kalman.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

@@ -31,7 +31,9 @@
 #include "I2C.h"
 #include "OLED.h"
 #include "MPU6050.h"
+#include "Kalman.h"
 #include <stdio.h>
+#include <math.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -55,6 +57,9 @@
 SoftI2C_t i2c_oled = {GPIOB, GPIO_PIN_6,  GPIOB, GPIO_PIN_7 };
 SoftI2C_t i2c_mpu  = {GPIOB, GPIO_PIN_10, GPIOB, GPIO_PIN_11};
 MPU6050_Data_t mpu_data;
+Kalman_t kalman;
+float pitch = 0;
+uint32_t last_tick = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -135,6 +140,9 @@ int main(void)
 
   MPU6050_Init(&i2c_mpu);
   MPU6050_Calibrate(200);
+
+  Kalman_Init(&kalman);
+  last_tick = HAL_GetTick();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -145,6 +153,23 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     MPU6050_ReadData(&mpu_data);
+
+    /*kalman滤波验证*/
+    // 计算 dt
+    uint32_t now = HAL_GetTick();
+    float dt = (now - last_tick) / 1000.0f;
+
+    // 防止dt异常
+    if(dt > 0.1f) dt = 0.1f;
+
+    // 计算绝对倾角
+    float acc_angle = atan2(mpu_data.accel_x, mpu_data.accel_z) * 57.2958f;
+
+    // 陀螺仪读数
+    float gyro_rate = mpu_data.gyro_y;
+
+    // 卡尔曼滤波更新
+    pitch = Kalman_Update(&kalman, acc_angle, gyro_rate, dt);
 
     OLED_Clear();
 
@@ -157,6 +182,12 @@ int main(void)
     OLED_ShowFloat(0,  3, mpu_data.gyro_x, 1);
     OLED_ShowFloat(45, 3, mpu_data.gyro_y, 1);
     OLED_ShowFloat(90, 3, mpu_data.gyro_z, 1);
+
+    OLED_ShowString(0, 4, "Acc Angle:");
+    OLED_ShowFloat(0, 5, acc_angle, 2);
+
+    OLED_ShowString(0, 6, "Kal Angle:");
+    OLED_ShowFloat(0, 7, pitch, 2);
 
     OLED_Refresh();
     HAL_Delay(50);
