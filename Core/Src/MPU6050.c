@@ -108,3 +108,25 @@ void MPU6050_Calibrate(uint16_t samples)
   gyro_bias_y = sum_gy / samples;
   gyro_bias_z = sum_gz / samples;
 }
+
+
+/*==========获取加速度计角度（含模长限制）==========*/
+float MPU6050_GetAccAngle(MPU6050_Data_t *data)
+{
+  // 计算模长平方
+  float acc_norm = data->accel_x * data->accel_x
+                 + data->accel_y * data->accel_y
+                 + data->accel_z * data->accel_z;
+
+  // 利用acc_norm判断MPU6050是否平滑运动
+  if (acc_norm > ACC_NORM_MIN && acc_norm < ACC_NORM_MAX)
+  {
+    // acc_norm正常 则正常返回值
+    return atan2(data->accel_x, data->accel_z) * 57.2958f;
+  } 
+  else
+  {
+    // 剧烈运动 返回999.0f 报错
+    return 999.0f;
+  }
+}

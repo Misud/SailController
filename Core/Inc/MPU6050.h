@@ -11,6 +11,10 @@
 
 #define MPU6050_ADDR 0x68
 
+// 模长平方 (0.8*0.8f ~ 1.2*1.2f) 
+#define ACC_NORM_MIN 0.64f
+#define ACC_NORM_MAX 1.44f
+
 // 数据结构体
 // 这里只需要 accel_x  (+：左偏，-：右偏)
 //           accel_z  (0: 水平，1：垂直)
@@ -43,5 +47,7 @@ void MPU6050_ReadData(MPU6050_Data_t *data);
 // 消除零偏
 void MPU6050_Calibrate(uint16_t samples);
  
+// 带钳位的数据返回
+float MPU6050_GetAccAngle(MPU6050_Data_t *data);
 
 #endif

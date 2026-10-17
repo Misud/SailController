@@ -2,6 +2,8 @@
     I2C
     用于搭建软件I2C架构
 */
+
+
 #include "I2C.h"
 #include <stdio.h>
 
@@ -10,7 +12,7 @@
 // 延时，约100kHz
 static void i2c_delay(void)
 {
-    for(volatile int i = 0; i < 50; i++);
+    for(volatile int i = 0; i < 10; i++);
 }
 
 // 引脚电平操作

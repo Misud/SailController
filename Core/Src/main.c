@@ -56,10 +56,11 @@
 /* USER CODE BEGIN PV */
 SoftI2C_t i2c_oled = {GPIOB, GPIO_PIN_6,  GPIOB, GPIO_PIN_7 };
 SoftI2C_t i2c_mpu  = {GPIOB, GPIO_PIN_10, GPIOB, GPIO_PIN_11};
-MPU6050_Data_t mpu_data;
+volatile MPU6050_Data_t mpu_data;
 Kalman_t kalman;
-float pitch = 0;
-uint32_t last_tick = 0;
+volatile float pitch = 0.0f;
+volatile float acc_angle = 0.0f;
+volatile float gyro_rate = 0.0f;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -114,18 +115,29 @@ int main(void)
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
   LED_OFF();                      // Ϩ��LED
-  HAL_TIM_Base_Start_IT(&htim1);  // ����TIM1 �ж�
 
+  // I2C初始化
   SoftI2C_Init(&i2c_oled);
   SoftI2C_Init(&i2c_mpu);
 
+  // OLED初始化
   OLED_Init(&i2c_oled);           // ��ʼ��OLED
   OLED_TestAllOn();
   HAL_Delay(1000);
   OLED_Clear();
 
-  SoftI2C_Scan(&i2c_oled);
-  SoftI2C_Scan(&i2c_mpu);
+  // MPU6050 初始化
+  MPU6050_Init(&i2c_mpu);
+  MPU6050_Calibrate(200);
+
+  // 卡尔曼滤波初始化
+  Kalman_Init(&kalman);
+
+  // TIM1 1kHz 初始化
+  __HAL_TIM_SET_COUNTER(&htim1, 0); // tim1 计数器从0开始
+  HAL_TIM_Base_Start_IT(&htim1);    // tim1 中断初始化
+
+  // 初始化界面展示
   uint8_t who_am_i = SoftI2C_ReadReg(&i2c_mpu, 0x68, 0x75);
 
   OLED_ShowString(0, 0, "OLED OK!");
@@ -138,11 +150,7 @@ int main(void)
   OLED_Clear();
   OLED_Refresh();
 
-  MPU6050_Init(&i2c_mpu);
-  MPU6050_Calibrate(200);
-
-  Kalman_Init(&kalman);
-  last_tick = HAL_GetTick();
+  
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -152,25 +160,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    MPU6050_ReadData(&mpu_data);
-
-    /*kalman滤波验证*/
-    // 计算 dt
-    uint32_t now = HAL_GetTick();
-    float dt = (now - last_tick) / 1000.0f;
-
-    // 防止dt异常
-    if(dt > 0.1f) dt = 0.1f;
-
-    // 计算绝对倾角
-    float acc_angle = atan2(mpu_data.accel_x, mpu_data.accel_z) * 57.2958f;
-
-    // 陀螺仪读数
-    float gyro_rate = mpu_data.gyro_y;
-
-    // 卡尔曼滤波更新
-    pitch = Kalman_Update(&kalman, acc_angle, gyro_rate, dt);
-
     OLED_Clear();
 
     OLED_ShowString(0,  0, "Accel(g):");
@@ -246,9 +235,26 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if(htim->Instance == TIM1)
   {
+    // 声光提示更新
     Buzzer_Update();
     LED_DoubleFlash_Update(Light_Sound_GetDuration());
     Light_Sound_Update();
+
+    // MPU6050数据更新
+    MPU6050_ReadData((MPU6050_Data_t *)&mpu_data);
+    float temp_acc_angle = MPU6050_GetAccAngle((MPU6050_Data_t *)&mpu_data);
+
+    if(temp_acc_angle != 999.0f)
+    { acc_angle = temp_acc_angle;   // 数据正常 
+    }
+    else
+    { acc_angle = pitch;            // 数据异常，保持上次数据
+    }
+
+    gyro_rate = mpu_data.gyro_y;
+
+    pitch = Kalman_Update(&kalman, acc_angle, gyro_rate, 0.005f);
+
   }
   else if(htim->Instance == TIM2)
   {

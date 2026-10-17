@@ -19,9 +19,9 @@ void Kalman_Init(Kalman_t *kalman)
 
     // Q_angle 越大 越信任加速度计
     // R_Measure 越大 越信任陀螺仪
-    kalman->Q_angle = 0.80f;
+    kalman->Q_angle = 0.10f;
     kalman->Q_bias  = 0.003f;
-    kalman->R_measure = 0.20f;
+    kalman->R_measure = 0.10f;
 }
 
 
