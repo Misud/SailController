@@ -32,6 +32,8 @@
 #include "OLED.h"
 #include "MPU6050.h"
 #include "Kalman.h"
+
+#include "KeyScan.h"
 #include <stdio.h>
 #include <math.h>
 /* USER CODE END Includes */
@@ -61,6 +63,7 @@ Kalman_t kalman;
 volatile float pitch = 0.0f;
 volatile float acc_angle = 0.0f;
 volatile float gyro_rate = 0.0f;
+volatile KeyValue_t key_from_isr = Key_None;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -155,31 +158,59 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  uint8_t key1_cnt = 0, key2_cnt = 0, key3_cnt = 0, key4_cnt = 0; 
+  KeyValue_t current_key;
   while (1)
   {
+    // 扫描按键
+    __disable_irq();
+    current_key = key_from_isr;
+    key_from_isr = Key_None;
+    __enable_irq();
+
+    if(current_key != Key_None)
+    {
+      switch(current_key)
+      {
+        case Key_1:key1_cnt++; break;
+         case Key_2:key2_cnt++; break;
+          case Key_3:key3_cnt++; break;
+           case Key_4:key4_cnt--; break;
+           default: break;
+      }
+    }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
     OLED_Clear();
 
-    OLED_ShowString(0,  0, "Accel(g):");
-    OLED_ShowFloat(0,  1, mpu_data.accel_x, 2);
-    OLED_ShowFloat(45, 1, mpu_data.accel_y, 2);
-    OLED_ShowFloat(90, 1, mpu_data.accel_z, 2);
+    // 刷新显示
+    OLED_ShowString(0, 0, "Long Press_Test");
 
-    OLED_ShowString(0,  2, "Gyro(deg/s):");
-    OLED_ShowFloat(0,  3, mpu_data.gyro_x, 1);
-    OLED_ShowFloat(45, 3, mpu_data.gyro_y, 1);
-    OLED_ShowFloat(90, 3, mpu_data.gyro_z, 1);
+    if(current_key != Key_None)
+    {
+      OLED_ShowString(0, 2, "Pressed:");
+      OLED_ShowInt(60, 2, current_key);
+    }
+    else 
+    {
+      OLED_ShowString(0, 2, "Pressed None!");
+    }
 
-    OLED_ShowString(0, 4, "Acc Angle:");
-    OLED_ShowFloat(0, 5, acc_angle, 2);
+    // 显示累计次数
+    OLED_ShowString(0, 4, "K1:");
+    OLED_ShowInt(30, 4, key1_cnt);
 
-    OLED_ShowString(0, 6, "Kal Angle:");
-    OLED_ShowFloat(0, 7, pitch, 2);
+    OLED_ShowString(64, 4, "K2:");
+    OLED_ShowInt(94, 4, key2_cnt);
+
+    OLED_ShowString(0, 5, "K3:");
+    OLED_ShowInt(32, 5, key3_cnt);
+
+    OLED_ShowString(64, 5, "K4:");
+    OLED_ShowInt(94, 5, key4_cnt);
 
     OLED_Refresh();
-    HAL_Delay(50);
   }
   /* USER CODE END 3 */
 }
@@ -254,6 +285,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     gyro_rate = mpu_data.gyro_y;
 
     pitch = Kalman_Update(&kalman, acc_angle, gyro_rate, 0.005f);
+
+    // 按键扫描
+    KeyValue_t temp_key = Key_Scan();
+    if(temp_key != Key_None)
+    {
+      key_from_isr = temp_key;
+    }
 
   }
   else if(htim->Instance == TIM2)
