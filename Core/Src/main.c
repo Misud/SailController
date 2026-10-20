@@ -31,6 +31,7 @@
 #include "I2C.h"
 #include "OLED.h"
 #include "MPU6050.h"
+#include "Motor.h"
 #include "Kalman.h"
 
 #include "KeyScan.h"
@@ -133,6 +134,9 @@ int main(void)
   MPU6050_Init(&i2c_mpu);
   MPU6050_Calibrate(200);
 
+  // 电机初始化
+  Motor_Init();
+
   // 卡尔曼滤波初始化
   Kalman_Init(&kalman);
 
@@ -162,55 +166,11 @@ int main(void)
   KeyValue_t current_key;
   while (1)
   {
-    // 扫描按键
-    __disable_irq();
-    current_key = key_from_isr;
-    key_from_isr = Key_None;
-    __enable_irq();
-
-    if(current_key != Key_None)
-    {
-      switch(current_key)
-      {
-        case Key_1:key1_cnt++; break;
-         case Key_2:key2_cnt++; break;
-          case Key_3:key3_cnt++; break;
-           case Key_4:key4_cnt--; break;
-           default: break;
-      }
-    }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    OLED_Clear();
-
-    // 刷新显示
-    OLED_ShowString(0, 0, "Long Press_Test");
-
-    if(current_key != Key_None)
-    {
-      OLED_ShowString(0, 2, "Pressed:");
-      OLED_ShowInt(60, 2, current_key);
-    }
-    else 
-    {
-      OLED_ShowString(0, 2, "Pressed None!");
-    }
-
-    // 显示累计次数
-    OLED_ShowString(0, 4, "K1:");
-    OLED_ShowInt(30, 4, key1_cnt);
-
-    OLED_ShowString(64, 4, "K2:");
-    OLED_ShowInt(94, 4, key2_cnt);
-
-    OLED_ShowString(0, 5, "K3:");
-    OLED_ShowInt(32, 5, key3_cnt);
-
-    OLED_ShowString(64, 5, "K4:");
-    OLED_ShowInt(94, 5, key4_cnt);
-
-    OLED_Refresh();
+    Motor_SetPWM(80.0f, 80.0f);
+    HAL_Delay(100);
   }
   /* USER CODE END 3 */
 }
