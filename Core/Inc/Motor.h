@@ -7,6 +7,8 @@
 
 #include "main.h"
 
+// 左侧为1号电机u1
+
 // 初始化电机PWM
 void Motor_Init(void);
 
