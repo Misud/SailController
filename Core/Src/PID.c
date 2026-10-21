@@ -20,6 +20,7 @@ void PID_Init(PID_t *pid, float kp, float ki, float kd, float out_max)
     pid->last_err       = 0;
     pid->integral       = 0;
     pid->Output         = 0;
+    pid->filtered_derivative = 0;
 
     pid->out_max = out_max;
     pid->integral_max = out_max * 0.5f;
@@ -42,36 +43,17 @@ float PID_Compute(PID_t *pid, float target, float actual, float dt)
     float raw_derivative = (pid->err - pid->last_err) / dt;
 
     // 微分低通滤波
-    static float filtered_derivative = 0;
-    filtered_derivative = 0.8f * filtered_derivative + 0.2f * raw_derivative;
+    pid->filtered_derivative = 0.8f * pid->filtered_derivative + 0.2f * raw_derivative;
 
     // 总输出
     float pid_feedback = (pid->Kp * pid->err) +
                          (pid->Ki * pid->integral)+
-                         (pid->Kd * filtered_derivative);
+                         (pid->Kd * pid->filtered_derivative);
 
     pid->last_err = pid->err;
 
-    // 重力前馈
-    float pid_ff = 0.0f;
-    if(pid->enable_ff)
-    {
-        float target_rad = target * 3.14159265f / 180.0f;
-
-        // 避开 90° 奇点
-        if(target_rad > 1.483f && target_rad < 1.658f)
-        {   pid_ff = 0.0f; }
-        else
-        {   pid_ff = pid->K_ff / tanf(target_rad);  }
-
-        // 前馈限幅
-        if(pid_ff > +30.0f)  pid_ff = +30.0f;
-        if(pid_ff < -30.0f)  pid_ff = -30.0f;
-
-    }
-
-    // 总输出 = 前馈+反馈
-    pid->Output = pid_ff + pid_feedback;
+    // 总输出 = 反馈
+    pid->Output = pid_feedback;
 
     // 输出限幅
     if(pid->Output > +pid->out_max) pid->Output = +pid->out_max;

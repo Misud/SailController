@@ -26,8 +26,7 @@ typedef struct{
 
     float Output;           // PID输出
 
-    float K_ff;             // 重力前馈系数
-    uint8_t enable_ff;      // 使能前馈
+    float filtered_derivative;  // 滤波
 }PID_t;
 
 // PID初始化

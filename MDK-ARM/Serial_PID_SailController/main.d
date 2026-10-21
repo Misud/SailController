@@ -46,5 +46,5 @@ serial_pid_sailcontroller/main.o: ..\Core\Src\main.c ..\Core\Inc\main.h \
   ..\Middlewares\ST\STM32_USB_Device_Library\Core\Inc\usbd_ctlreq.h \
   ..\Core\Inc\Light_Sound.h ..\Core\Inc\I2C.h ..\Core\Inc\OLED.h \
   ..\Core\Inc\MPU6050.h ..\Core\Inc\Motor.h ..\Core\Inc\Kalman.h \
-  ..\Core\Inc\PID.h ..\Core\Inc\KeyScan.h \
-  D:\KEIL5_Dev\ARM\ARMCLANG\include\math.h
+  ..\Core\Inc\PID.h ..\Core\Inc\FiniteState_Machine.h \
+  ..\Core\Inc\KeyScan.h D:\KEIL5_Dev\ARM\ARMCLANG\include\math.h

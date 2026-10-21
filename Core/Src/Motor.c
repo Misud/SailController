@@ -18,7 +18,7 @@ void Motor_SetPWM(float u1, float u2)
     if(u1 < 0.0f)   u1 = 0.0f;
 
     if(u2 > 100.0f) u2 = 100.0f;
-    if(u2 < 0.0f)   u1 = 0.0f;
+    if(u2 < 0.0f)   u2 = 0.0f;
 
     // 将占空比（0~100）分配到寄存器（0~3599）
     uint16_t ccr1 = (uint16_t)((u1 / 100.0f) * PWM_MAX_ARR); 
