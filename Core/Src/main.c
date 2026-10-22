@@ -83,6 +83,10 @@ volatile KeyValue_t key_from_isr = Key_None;
 // 电机参数
 const float U0 = 55.0f;   // 基础占空比
 
+// 速度控制模式参数
+volatile uint8_t is_speed_mode = 0;    // 0 = 角度控制模式 1 = 速度控制模式
+volatile float   omega_cmd = 0.0f;       // 目标角速度
+
 // 全局参数 
 float target_angle = 90.0f; // 用于PID调试
 float current_angle = 90.0f;         // 实际角度
@@ -314,8 +318,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     if(outer_loop_cnt >= 5) // 5 * 5ms = 25ms
     {
       outer_loop_cnt = 0;
-      // 外环
-      target_omega = PID_Compute(&pid_angle, target_angle, physical_angle, 0.025f);
+      
+      if(is_speed_mode)
+      {
+        target_omega = omega_cmd; // 速度模式，使用预设角速度
+      }else{
+        // 外环
+        target_omega = PID_Compute(&pid_angle, target_angle, physical_angle, 0.025f);
+      }
     }
 
     // 内环

@@ -16,6 +16,8 @@ extern float target_angle;
 extern float current_angle;
 extern volatile KeyValue_t key_from_isr;
 extern volatile uint32_t sys_tick_ms;
+extern volatile uint8_t is_speed_mode;
+extern volatile omega_cmd;
 
 // 初始角度
 #define INIT_ANGLE      90.0f   // 初始角度
@@ -46,7 +48,7 @@ void FSM_Update(void)
         if(key_from_isr == Key_1)   { current_state = STATE_CMD1; sub_state = 0; }
         if(key_from_isr == Key_2)   { current_state = STATE_CMD2; sub_state = 0; step_angle = 45; }
         if(key_from_isr == Key_3)   { current_state = STATE_CMD3; sub_state = 0; swing_count = 0; }
-        // KEY4暂不出列
+        if(key_from_isr == Key_4)   { current_state = STATE_CMD4; sub_state = 0; }
 
         key_from_isr = Key_None;    // 重置按键
     }
@@ -190,5 +192,54 @@ void FSM_Update(void)
                     
             }
             break;
+
+        case STATE_CMD4:
+            switch(sub_state)
+            {
+            case 0: // 前往起点A
+                is_speed_mode = 0;  // 角度模式
+                target_angle = 45.0f;   // 预设角度 45~135
+                if( fabsf(target_angle - current_angle) < ANGLE_TOLERANCE )
+                {
+                    sub_state = 1;
+                }
+                break;
+
+            case 1: // 起步阶段
+                target_angle = 135.0f;  
+                omega_cmd = 15.0f;      // 角速度15deg/s
+
+                is_speed_mode = 1;  // 速度模式
+                sub_state = 2;
+                break;
+
+            case 2: // 匀速阶段
+               {
+                float breaking_distance = 10.0f;
+                if(fabsf(target_angle - current_angle) <= breaking_distance)
+                {
+                    is_speed_mode = 0;  // 切换角度模式
+                    sub_state = 3;
+                }
+                break;
+               }
+
+            case 3: // 停止阶段
+                if(fabsf(target_angle - current_angle) < ANGLE_TOLERANCE)
+                {
+                    Light_Sound_Start(800);
+                    sub_state = 4;
+                }
+                break;
+
+            case 4: // 复位
+                if(Light_Sound_Done())
+                {
+                    current_state = STATE_IDLE;
+                }
+                break;
+            }
+            break;
     }
+    
 }
