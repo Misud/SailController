@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
@@ -35,6 +36,7 @@
 #include "Kalman.h"
 #include "PID.h"
 #include "FiniteState_Machine.h"
+#include "ringbuf.h"
 
 #include "KeyScan.h"
 #include <stdio.h>
@@ -81,7 +83,7 @@ PID_t pid_gyro;     // 内环PID
 volatile KeyValue_t key_from_isr = Key_None;
 
 // 电机参数
-const float U0 = 55.0f;   // 基础占空比
+const float U0 = 50.0f;   // 基础占空比
 
 // 速度控制模式参数
 volatile uint8_t is_speed_mode = 0;    // 0 = 角度控制模式 1 = 速度控制模式
@@ -91,6 +93,18 @@ volatile float   omega_cmd = 0.0f;       // 目标角速度
 float target_angle = 90.0f; // 用于PID调试
 float current_angle = 90.0f;         // 实际角度
 volatile uint32_t sys_tick_ms = 0;  // 系统时间戳
+
+
+
+//winly:
+extern ringbuf_t ringbuffer;
+volatile float physical_angle = 0.0f;
+volatile float target_omega = 0.0f;
+volatile float total_delta_u = 0.0f;
+volatile float test_angle = 90.0f;//用于调试pid
+volatile float test_omega = 0.0f;
+
+char msg[64];//打印
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -101,10 +115,14 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-int fputc(int ch, FILE *f)
+void myprintf(const char *msg)
 {
-  HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 10);
-  return ch;
+    if (msg == NULL) return;
+
+    uint16_t len = (uint16_t)strlen(msg);
+    if (len == 0) return;
+    HAL_UART_Transmit_DMA(&huart1,(uint8_t *)msg, len);
+    
 }
 /* USER CODE END 0 */
 
@@ -137,6 +155,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_SPI1_Init();
   MX_TIM1_Init();
   MX_TIM2_Init();
@@ -168,13 +187,16 @@ int main(void)
   Kalman_Init(&kalman);
 
   // PID初始化
-  PID_Init(&pid_angle, 1.4725f, 0.5525f, 1.2025f, 20.0f);   // 外环PID，期望角速度±20deg/s //3.4725f, 0.0625f, 0.2025f 
-  PID_Init(&pid_gyro,  0.3625f, 0.0f, 	 0.0045f, 60.0f);   // 内环PID，限制delta_u ±60% // 1.3625f, 0.0f, 0.0045f, 60.0f
+  PID_Init(&pid_angle, 0.4f, 0.0f, 0.0f, 20.0f);   // 外环PID，期望角速度±20deg/s //3.4725f, 0.0625f, 0.2025f 
+  PID_Init(&pid_gyro,  0.01937f, 0.0f, 0.01055f, 60.0f);   // 内环PID，限制delta_u ±60% // 0.01935f, 0.0105f, 0.0f
 
   // TIM1 1kHz 初始化
   __HAL_TIM_SET_COUNTER(&htim1, 0); // tim1 计数器从0开始
   HAL_TIM_Base_Start_IT(&htim1);    // tim1 中断初始化
+    
+  //winly:
 
+  
   // 初始化界面展示
   uint8_t who_am_i = SoftI2C_ReadReg(&i2c_mpu, 0x68, 0x75);
 
@@ -188,7 +210,7 @@ int main(void)
   OLED_Clear();
   OLED_Refresh();
 
-  
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -198,10 +220,12 @@ int main(void)
 
   while (1)
   {
-    FSM_Update();
-
+    
     // 屏幕刷新
     OLED_Clear();
+    
+    FSM_Update();
+    
     OLED_ShowString(0, 0, "Target:");
     OLED_ShowInt(60, 0, (int)target_angle);
 
@@ -210,8 +234,14 @@ int main(void)
 
     OLED_ShowString(0, 4, "PID Out:");
     OLED_ShowFloat(60, 4, pid_gyro.Output, 2);
+      
+    OLED_ShowString(0, 6, "okp");
+    OLED_ShowFloat(60, 6, pid_angle.Kp, 4);
 
     OLED_Refresh();
+    sprintf(msg,"%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n",target_angle,physical_angle,target_omega,gyro_rate,pid_gyro.Output,total_delta_u);
+    myprintf(msg);
+        
     HAL_Delay(50);
     /* USER CODE END WHILE */
 
@@ -291,12 +321,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     float raw_gyro = mpu_data.gyro_y;
     // 角速度低通滤波
     static float filtered_gyro = 0.0f;
-    filtered_gyro = 0.7f * filtered_gyro + 0.3f * raw_gyro;
+    filtered_gyro = 0.3f * filtered_gyro + 0.7f * raw_gyro;
     gyro_rate = filtered_gyro;
 
     pitch = Kalman_Update(&kalman, acc_angle, gyro_rate, 0.005f);
     //  坐标系修正
-    float physical_angle = 90.0f - pitch;
+    physical_angle = 90.0f - pitch;
     current_angle = physical_angle;
 
     /*系统计时*/
@@ -312,7 +342,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     /*串级PID*/
     // 内环 5ms 外环 25ms
     static uint8_t outer_loop_cnt = 0;
-    static float target_omega = 0.0f;
     
     outer_loop_cnt++;
     if(outer_loop_cnt >= 5) // 5 * 5ms = 25ms
@@ -329,26 +358,26 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     }
 
     // 内环
-    float delta_u_feedback = PID_Compute(&pid_gyro, target_omega, gyro_rate, 0.005f);
+    target_omega = test_omega;
+    float delta_u_feedback = PID_Compute(&pid_gyro,target_omega, gyro_rate, 0.005f);//
 
-		// 前馈处理
-    float target_rad = target_angle * 3.14159f / 180.0f;
-    float delta_u_ff = 0.0f;
-    if(fabsf(target_rad - 1.5708f) > 0.01f)
-    {
-      delta_u_ff = -40.0625f / tanf(target_rad) ; // -40.0625f
-      if(delta_u_ff > +50.0f) delta_u_ff = +50.0f;
-      if(delta_u_ff < -50.0f) delta_u_ff = -50.0f;
-    }
+//		// 前馈处理
+//    float target_rad = target_angle * 3.14159f / 180.0f;
+//    float delta_u_ff = 0.0f;
+//    if(fabsf(target_rad - 1.5708f) > 0.01f)
+//    {
+//      delta_u_ff = -40.0625f * tanf(target_rad) ; // -40.0625f
+//      if(delta_u_ff > +50.0f) delta_u_ff = +50.0f;
+//      if(delta_u_ff < -50.0f) delta_u_ff = -50.0f;
+//    }
 
-    float total_delta_u = delta_u_feedback + delta_u_ff;
+    total_delta_u = delta_u_feedback;// + delta_u_ff;
     //死区屏蔽
-    if (total_delta_u > 0.0f && total_delta_u < 0.2)  total_delta_u = 0.0f;
-    if (total_delta_u < 0.0f && total_delta_u > -0.2) total_delta_u = 0.0f;
+    if (total_delta_u > 0.0f && total_delta_u < 0.5)  total_delta_u = 0.0f; // 0.5
+    if (total_delta_u < 0.0f && total_delta_u > -0.5) total_delta_u = 0.0f;
 		
 		// 消除机械静差
-		total_delta_u += 2.28125f;
-
+//    total_delta_u += -4.0f;
     /*分配PWM*/
     float u1 = U0 + (total_delta_u / 2.0f);
     float u2 = U0 - (total_delta_u / 2.0f);

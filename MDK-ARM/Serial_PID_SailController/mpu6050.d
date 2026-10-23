@@ -8,9 +8,9 @@ serial_pid_sailcontroller/mpu6050.o: ..\Core\Src\MPU6050.c \
   ..\Drivers\CMSIS\Device\ST\STM32F1xx\Include\stm32f103xb.h \
   ..\Drivers\CMSIS\Include\core_cm3.h \
   D:\KEIL5_Dev\ARM\ARMCLANG\include\stdint.h \
-  D:\STM32CubeMX_Project\Serial_PID_SailController\Drivers\CMSIS\Include\cmsis_version.h \
-  D:\STM32CubeMX_Project\Serial_PID_SailController\Drivers\CMSIS\Include\cmsis_compiler.h \
-  D:\STM32CubeMX_Project\Serial_PID_SailController\Drivers\CMSIS\Include\cmsis_armclang.h \
+  D:\STM32CubeMX_Project\SailController\SailController\Drivers\CMSIS\Include\cmsis_version.h \
+  D:\STM32CubeMX_Project\SailController\SailController\Drivers\CMSIS\Include\cmsis_compiler.h \
+  D:\STM32CubeMX_Project\SailController\SailController\Drivers\CMSIS\Include\cmsis_armclang.h \
   D:\KEIL5_Dev\ARM\ARMCLANG\include\arm_compat.h \
   D:\KEIL5_Dev\ARM\ARMCLANG\include\arm_acle.h \
   ..\Drivers\CMSIS\Device\ST\STM32F1xx\Include\system_stm32f1xx.h \
